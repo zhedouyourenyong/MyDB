@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sql-mapping>
+
+	<!-- 如果使用注解方式，就不要再这里mapping -->
+	<!--  
+    <class name="db.Student" table="student" >
+        <property name="id" type="java.lang.Integer" generated="false" />
+        <property name="name" type="java.lang.String" />        
+        <property name="sex" type="java.lang.Boolean" />        
+        <property name="phone" type="java.lang.String" />        
+        <property name="birthday" type="java.util.Date" />        
+    </class>
+    -->
+    
+</sql-mapping>
