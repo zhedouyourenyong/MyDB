@@ -3,6 +3,8 @@ package db.session;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import db.configuration.ConfigConstant;
+import db.configuration.ConfigHelper;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -17,30 +19,6 @@ public class SqlSessionFactory
 {
     private static ComboPooledDataSource c3p0Pool = new ComboPooledDataSource();
 
-    static
-    {
-        try
-        {
-            config("127.0.0.1", 3306, "test", "root", "123456");
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private static void config (String ip, int port, String database, String user, String password) throws Exception
-    {
-        String jdbcUrl = String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8", ip, port, database);
-        c3p0Pool.setDriverClass("com.mysql.jdbc.Driver");
-        c3p0Pool.setJdbcUrl(jdbcUrl);
-        c3p0Pool.setUser(user);
-        c3p0Pool.setPassword(password);
-        c3p0Pool.setInitialPoolSize(2);
-        c3p0Pool.setMinPoolSize(2);
-        c3p0Pool.setMaxPoolSize(10);
-        c3p0Pool.setMaxIdleTime(30);
-        c3p0Pool.setIdleConnectionTestPeriod(60);
-    }
 
     public static SqlSession getConnection () throws Exception
     {

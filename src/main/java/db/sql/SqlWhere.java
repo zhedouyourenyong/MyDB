@@ -1,6 +1,6 @@
 package db.sql;
 
-import db.utils.AfSql;
+import db.utils.SqlUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class SqlWhere
 	// 加入有操作符的表达式
 	public SqlWhere add(String name, String op, Object value)
 	{
-		 add( AfSql.name(name) + op + AfSql.value(value.toString()));
+		 add( SqlUtil.name(name) + op + SqlUtil.value(value.toString()));
 		 return this;
 	}
 	
@@ -84,11 +84,11 @@ public class SqlWhere
 	{
 		if(values.size() == 0) return this;
 		
-		String sql =  AfSql.name(name) + " IN (";
+		String sql =  SqlUtil.name(name) + " IN (";
 		
 		for(int i=0; i<values.size(); i++)
 		{
-			String s = AfSql.value( values.get(i).toString());
+			String s = SqlUtil.value( values.get(i).toString());
 			sql += s;
 			if(i != values.size() - 1) sql += ",";
 		}
@@ -102,13 +102,13 @@ public class SqlWhere
 	{
 		if(values.length == 0) return this;
 		
-		String sql = AfSql.name(name) + "IN (";
+		String sql = SqlUtil.name(name) + "IN (";
 		for(int i=0; i<values.length; i++)
 		{
 			String a = values[i].toString().trim();
 			if(a.length() == 0) continue;
 			
-			String s = AfSql.value(a);
+			String s = SqlUtil.value(a);
 			sql += s;
 			if(i != values.length - 1) sql += ",";
 		}
