@@ -1,9 +1,10 @@
-package db.session;
+package framework.session;
 
-import db.mapping.ConfigurationManager;
-import db.mapping.Configuration;
-import db.sql.SqlInsert;
-import db.utils.ReflectUtil;
+import framework.tableMapping.TableManager;
+import framework.tableMapping.TableInfo;
+import framework.utils.TypeConvertorUtil;
+import framework.utils.sql.SqlInsert;
+import framework.utils.ReflectUtil;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -19,8 +20,8 @@ import java.util.List;
  * */
 public class SqlSession
 {
-    public Connection connection;
-    public String lastSQL = "";
+    private Connection connection;
+    private String lastSQL = "";
 
     public SqlSession ()
     {
@@ -72,7 +73,6 @@ public class SqlSession
         connection.rollback();
     }
 
-    //删，改
     public void execute (String sql) throws Exception
     {
         this.lastSQL = sql;
@@ -80,7 +80,6 @@ public class SqlSession
         statement.execute(sql);
     }
 
-    //执行查询，返回结果集
     public ResultSet executeQuery (String sql) throws Exception
     {
         this.lastSQL = sql;
@@ -90,11 +89,9 @@ public class SqlSession
     }
 
     // 执行查询, 并自动映射 (不要求POJO中有注解)
-    public<T> List<T> executeQuery (String sql, Class<T> clazz) throws Exception
+    public <T> List<T> executeQuery (String sql, Class<T> clazz) throws Exception
     {
-        this.lastSQL = sql;
-        Statement stmt = connection.createStatement();
-        ResultSet resultSet = stmt.executeQuery(sql);
+        ResultSet resultSet = executeQuery(sql);
 
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         int columnsCount = resultSetMetaData.getColumnCount(); //一共有几列
@@ -108,26 +105,28 @@ public class SqlSession
         }
 
 
-        Configuration sqlPojo = ConfigurationManager.i.findClassByClassName(clazz.getName());
-        if(sqlPojo == null) //从注解提取信息
-            sqlPojo = ConfigurationManager.i.findClassByAnnotation(clazz);
+        TableInfo tableInfo = TableManager.getInstance().findTableInfoByClassName(clazz.getName());
+        if(tableInfo == null) //从注解提取信息
+            tableInfo = TableManager.getInstance().findTableInfoByAnnotation(clazz);
 
 
-        List<T> result = new ArrayList<>();
+        resultSet.last();
+        int count = resultSet.getRow();
+        resultSet.beforeFirst();
 
+        List<T> result = new ArrayList<>(count);  //避免扩容
         while (resultSet.next())
         {
-            T pojo = clazz.newInstance();
+            T pojo = (T) ReflectUtil.newInstance(clazz);
             result.add(pojo);
             for (int i = 0; i < columnsCount; i++)
             {
                 int idx = i + 1;
                 String columnValue = resultSet.getString(idx); // 每列的值
-                Method method = sqlPojo.setters.get(labels[i]);
-
+                Method method = tableInfo.setters.get(labels[i]);
                 try
                 {
-                    ReflectUtil.map(pojo, method, types[i], columnValue);
+                    TypeConvertorUtil.map(pojo, method, types[i], columnValue);
                 } catch (Exception e)
                 {
                     e.printStackTrace();
@@ -138,29 +137,26 @@ public class SqlSession
     }
 
 
-//  核心就是拼湊出SQL語句
     public void insert (Object pojo) throws Exception
     {
         Class clazz = pojo.getClass();
 
-        Configuration pojoConfig = ConfigurationManager.i.findClassByClassName(clazz.getName());
-        if(pojoConfig == null)
-            pojoConfig = ConfigurationManager.i.findClassByAnnotation(pojo.getClass()); // 从注解来提取
+        TableInfo tableInfo = TableManager.getInstance().findTableInfoByClassName(clazz.getName());
+        if(tableInfo == null)
+            tableInfo = TableManager.getInstance().findTableInfoByAnnotation(pojo.getClass()); // 从注解来提取
 
-        if(pojoConfig.table == null)
-            throw new Exception("类 " + clazz.getName() + "中无AFTABLE注解! 无法自动插入!");
+        if(tableInfo.table == null)
+            throw new Exception("类 " + clazz.getName() + "中无TABLE注解! 无法自动插入!");
 
 
-        SqlInsert si = new SqlInsert(pojoConfig.table);
+        SqlInsert si = new SqlInsert(tableInfo.table);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-        for (Configuration.Property p : pojoConfig.properties) // sc.properties
+        for (TableInfo.Property p : tableInfo.properties) // sc.properties
         {
             String fieldName = p.name;
-
-//            Method getter = ReflectUtil.findGetter(clazz, fieldName);
-            Method getter = pojoConfig.getters.get(fieldName);
+            Method getter = tableInfo.getters.get(fieldName);
             try
             {
                 Object value = getter.invoke(pojo);
@@ -188,7 +184,7 @@ public class SqlSession
         this.lastSQL = sql;
 
         Statement stmt = connection.createStatement();
-        if(pojoConfig.generatedKey == null)
+        if(tableInfo.generatedKey == null)
         {
             // 无自增ID
             stmt.execute(sql);
@@ -205,8 +201,8 @@ public class SqlSession
                 String id = keys.getString(1);
                 try
                 {
-                    Method setter = ReflectUtil.findSetter(clazz, pojoConfig.generatedKey);
-                    ReflectUtil.setIntValue(pojo, setter, id);
+                    Method setter = ReflectUtil.findSetter(clazz, tableInfo.generatedKey);
+                    TypeConvertorUtil.setIntValue(pojo, setter, id);
                 } catch (Exception e)
                 {
                     e.printStackTrace();

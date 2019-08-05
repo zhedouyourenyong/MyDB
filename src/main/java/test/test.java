@@ -2,9 +2,7 @@ package test;
 
 
 import com.alibaba.fastjson.JSONArray;
-import db.session.SqlSessionFactory;
-
-import java.util.Map;
+import framework.session.SqlSessionFactory;
 
 public class test
 {
@@ -16,5 +14,8 @@ public class test
         String sql="select * from student";
         JSONArray array=SqlSessionFactory.executeQuery2JSONArray(sql);
         System.out.println(array);
+
     }
 }
+
+

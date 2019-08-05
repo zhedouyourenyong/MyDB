@@ -1,4 +1,4 @@
-package db.utils;
+package framework.utils.sql;
 
 public class SqlUtil
 {
@@ -6,7 +6,7 @@ public class SqlUtil
     public static String name(String str)
     {
         if(str.indexOf('.')>=0)
-            return str; // "db.table.column"
+            return str; // "framework.table.column"
         if(str.indexOf('`')>=0)
             return str;
         return "`" + str + "`";

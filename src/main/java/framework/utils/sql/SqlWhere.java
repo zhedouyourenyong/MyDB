@@ -1,6 +1,4 @@
-package db.sql;
-
-import db.utils.SqlUtil;
+package framework.utils.sql;
 
 import java.util.ArrayList;
 import java.util.List;

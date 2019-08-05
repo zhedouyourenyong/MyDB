@@ -1,17 +1,11 @@
-package db.utils;
+package framework.utils;
 
 import java.lang.reflect.Method;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
-/*
- *
- * */
-public class ReflectUtil
+public class TypeConvertorUtil
 {
-
     public static void map (Object pojo, Method method, int columnType, String columnValue) throws Exception
     {
         SimpleDateFormat sdf_d = new SimpleDateFormat("yyyy-MM-dd");
@@ -92,150 +86,41 @@ public class ReflectUtil
         {
             Class[] parameterTypes = method.getParameterTypes();
             Class c = parameterTypes[0];
-            System.out.println("期望类型:" + c.getCanonicalName() + "，实际类型:" + arg0.getClass().getCanonicalName() );
+            System.out.println("期望类型:" + c.getCanonicalName() + "，实际类型:" + arg0.getClass().getCanonicalName());
             e.printStackTrace();
         }
-
     }
 
-    public static void setIntValue(Object pojo, Method setter, String value) throws Exception
+    public static void setIntValue (Object pojo, Method setter, String value) throws Exception
     {
         Object arg0 = null;
 
         // 整数类型的处理
         Class[] parameterTypes = setter.getParameterTypes();
         Class c = parameterTypes[0];
-        if(c.equals( int.class) || c.equals(Integer.class))
+        if(c.equals(int.class) || c.equals(Integer.class))
         {
             arg0 = Integer.valueOf(value);
-        }
-        else if(c.equals( long.class) || c.equals(Long.class))
+        } else if(c.equals(long.class) || c.equals(Long.class))
         {
-            arg0 =  Long.valueOf(value);
-        }
-        else if(c.equals( short.class) || c.equals(Short.class))
+            arg0 = Long.valueOf(value);
+        } else if(c.equals(short.class) || c.equals(Short.class))
         {
-            arg0 =  Short.valueOf(value);
-        }
-        else if(c.equals( byte.class) || c.equals(Byte.class))
+            arg0 = Short.valueOf(value);
+        } else if(c.equals(byte.class) || c.equals(Byte.class))
         {
-            arg0 =  Byte.valueOf(value);
+            arg0 = Byte.valueOf(value);
         }
 
-        Object args[] = { arg0 };
-        try {
+        Object args[] = {arg0};
+        try
+        {
             if(arg0 != null) setter.invoke(pojo, args);
-        }catch(IllegalArgumentException e)
+        } catch (IllegalArgumentException e)
         {
             //System.out.println("期望类型:" + c.getCanonicalName() + "，实际类型:" + arg0.getClass().getCanonicalName() );
             e.printStackTrace();
         }
-    }
-
-
-
-    public static String toGetter (String fieldName)
-    {
-        // "name" -> "getName()"
-        char firstChar = Character.toUpperCase(fieldName.charAt(0));
-        StringBuffer strbuf = new StringBuffer("get" + fieldName);
-        strbuf.setCharAt(3, firstChar);
-        return strbuf.toString();
-    }
-
-    public static String[] toGetter (String[] fieldName)
-    {
-        String[] result = new String[fieldName.length];
-        for (int i = 0; i < fieldName.length; i++)
-        {
-            result[i] = toGetter(fieldName[i]);
-        }
-        return result;
-    }
-
-    public static String toSetter (String fieldName)
-    {
-        // "name" -> "setName()"
-        char firstChar = Character.toUpperCase(fieldName.charAt(0));
-        StringBuffer strbuf = new StringBuffer("set" + fieldName);
-        strbuf.setCharAt(3, firstChar);
-        return strbuf.toString();
-    }
-
-    public static String[] toSetter (String[] fieldName)
-    {
-        String[] result = new String[fieldName.length];
-        for (int i = 0; i < fieldName.length; i++)
-        {
-            result[i] = toSetter(fieldName[i]);
-        }
-        return result;
-    }
-
-
-    public static Method findSetter (Class cls, String fieldName)
-    {
-        String methodName = toSetter(fieldName);
-        Method[] methods = cls.getMethods();
-        for (Method m : methods)
-        {
-            if(m.getName().equals(methodName))
-            {
-                return m;
-            }
-        }
-        return null;
-    }
-
-    public static Method[] findSetter (Class cls, String[] labels)
-    {
-        labels = toSetter(labels);
-        Method[] result = findMethods(cls, labels);
-        return result;
-    }
-
-    public static Method findGetter (Class cls, String fieldName)
-    {
-        String methodName = toGetter(fieldName);
-        Method[] methods = cls.getMethods();
-        for (Method m : methods)
-        {
-            if(m.getName().equals(methodName))
-            {
-                return m;
-            }
-        }
-        return null;
-    }
-
-    public static Method[] findGetter (Class cls, String[] labels)
-    {
-        labels = toGetter(labels);
-        Method[] result = findMethods(cls, labels);
-        return result;
-    }
-
-    public static Map<String, Method> findMethodsMap (Class cls, String[] methodNames)
-    {
-        Method[] methods = cls.getMethods();
-        Map<String, Method> map = new HashMap<>(methods.length);
-        for (int i = 0; i < methods.length; i++)
-        {
-            map.put(methods[i].getName(), methods[i]);
-        }
-        return map;
-    }
-
-    public static Method[] findMethods (Class cls, String[] methodNames)
-    {
-        Method[] result = new Method[methodNames.length];
-        Map<String, Method> map = findMethodsMap(cls, methodNames);
-        for (int i = 0; i < methodNames.length; i++)
-        {
-            result[i] = map.get(methodNames[i]);
-        }
-
-        return result;
     }
 
 }

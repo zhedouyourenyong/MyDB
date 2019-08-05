@@ -1,10 +1,8 @@
-package db.session;
+package framework.session;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import db.configuration.ConfigConstant;
-import db.configuration.ConfigHelper;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

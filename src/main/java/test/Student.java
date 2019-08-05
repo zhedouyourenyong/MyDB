@@ -1,11 +1,11 @@
 package test;
 
 
-import db.annotation.AFCOLUMNS;
-import db.annotation.AFTABLE;
+import framework.annotation.COLUMNS;
+import framework.annotation.TABLE;
 
-@AFTABLE(name="student")
-@AFCOLUMNS(auto=true, generated="id")
+@TABLE(tableName ="student")
+@COLUMNS(auto=true, generated="id")
 public class Student
 {
 	int id;
@@ -27,6 +27,4 @@ public class Student
 	{
 		this.name = name;
 	}
-	
-	
 }
